@@ -6,6 +6,7 @@ import java.time.LocalDate;
 
 import javax.persistence.*;
 
+
 @Entity
 @Getter
 @Setter
@@ -13,6 +14,12 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Table(name = "products")
 public class Product {
+    public enum ProductType {
+        NORMAL,
+        SEASONAL,
+        EXPIRABLE
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -24,8 +31,9 @@ public class Product {
     @Column(name = "available")
     private Integer available;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    private String type;
+    private ProductType type;
 
     @Column(name = "name")
     private String name;
@@ -38,4 +46,25 @@ public class Product {
 
     @Column(name = "season_end_date")
     private LocalDate seasonEndDate;
+
+    public boolean hasStock() {
+        return available > 0;
+    }
+
+    public void decrementStock() {
+        if (hasStock()) {
+            available--;
+        }
+    }
+
+    public boolean isInSeason() {
+        LocalDate now = LocalDate.now();
+        return now.isAfter(seasonStartDate) && now.isBefore(seasonEndDate);
+    }
+
+    public boolean isExpiredAndValid() {
+        LocalDate now = LocalDate.now();
+        return expiryDate.isAfter(now);
+    }
+
 }
